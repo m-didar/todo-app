@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  todo-backend:
+    build: ./backend
+    container_name: todo-backend
+    ports:
+      - "5000:5000"
+
+  todo-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todo-frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    links:
+      - todo-backend
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  todo-data:
