@@ -1,7 +1,10 @@
-FROM node:14.15.4-alpine
-ENV NODE_ENV=production
+FROM node:14.15.4-alpine AS base
 WORKDIR /workspace
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
 COPY . .
-CMD ["node", "server.js"]
+
+FROM base AS production
+ENV NODE_PATH=./build
+EXPOSE 5000
+RUN npm run build

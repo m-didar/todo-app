@@ -7,6 +7,8 @@ import ItemAddForm from "../item-add-form";
 import axios from "axios"
 import './app.css';
 
+const baseUrl = "http://localhost:5000/todos/"
+
 export default class App extends Component {
 
     constructor(props) {
@@ -20,7 +22,7 @@ export default class App extends Component {
     };
 
     componentDidMount() {
-        axios.get('http://localhost:5000/todos/')
+        axios.get(baseUrl)
             .then(res => {
                 this.setState({
                     todoData: res.data.map(todo => this.createTodoItem(todo))
@@ -29,18 +31,17 @@ export default class App extends Component {
     }
 
     createTodoItem(todo) {
-        const { name, important, done, _id } = todo
+        const { name, important, done, id } = todo
         return {
             label: name,
             important,
             done,
-            id: _id
+            id
         }
     }
 
     deleteItem = (id) => {
-        console.log(id)
-        axios.delete("http://localhost:5000/todos/" + id)
+        axios.delete(baseUrl + id)
             .then(res => console.log(res.data))
 
         this.setState({
@@ -48,7 +49,7 @@ export default class App extends Component {
         })
     };
 
-    addItem = (text) => {
+    addItem = async (text) => {
 
         const todoObj = {
             name: text,
@@ -56,12 +57,12 @@ export default class App extends Component {
             done: false
         }
 
-        axios.post("http://localhost:5000/todos/add", todoObj)
+        await axios.post(baseUrl, todoObj)
             .then(res => {
-                console.log(res.data)
-                todoObj._id = res.data._id
+                todoObj.id = res.data.id
             })
         const todoItem = this.createTodoItem(todoObj)
+        console.log("id " + todoObj.id)
         this.setState(({todoData}) => {
             return {
                 todoData: [...todoData, todoItem]
@@ -82,7 +83,7 @@ export default class App extends Component {
         const todoItem = todoData.find(el => el.id == id)
         const { done, important } = todoItem
 
-        axios.post("http://localhost:5000/todos/update/" + id, {
+        axios.post(baseUrl + "update/" + id, {
             done: !done,
             important,
         })
@@ -100,7 +101,7 @@ export default class App extends Component {
         const done = todoItem.done
         const important = todoItem.important
 
-        axios.post("http://localhost:5000/todos/update/" + id, {
+        axios.post(baseUrl + "/update/" + id, {
             done,
             important: !important
         })
@@ -126,7 +127,6 @@ export default class App extends Component {
         const { todoData, searchLabel, filterType } = this.state;
         const filteredList = todoData ? todoData
             .filter((item) => {
-                console.log(item)
                 return item.label.toLowerCase().includes(searchLabel.toLowerCase())
             })
             .filter((item) => {
